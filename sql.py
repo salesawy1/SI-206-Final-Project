@@ -1,44 +1,55 @@
 import sqlite3
 
 class SQLInterface:
-    def __init__(self, db_name):
+    def __init__(self, db_name, table_name, columns):
         self.db_name = db_name
+        self.table_name = table_name
         self.conn = sqlite3.connect(db_name)
         self.c = self.conn.cursor()
+        self.columns = columns # { name: string, type: string }[]
         
-    def get_table(self, table_name):
-        self.c.execute('SELECT * FROM ' + table_name)
+        # honestly just call get_or_create_table() here rather than always doing it outside
+        self.get_or_create_table(columns)
+        
+    def get_table(self):
+        self.c.execute('SELECT * FROM ' + self.table_name)
         return self.c.fetchall()
     
-    def create_table(self, table_name, columns):
-        self.c.execute('CREATE TABLE ' + table_name + ' (' + ', '.join([c['name'] + ' ' + c['type'] for c in columns]) + ')')
+    def create_table(self, columns):
+        self.c.execute('CREATE TABLE ' + self.table_name + ' (' + ', '.join([c['name'] + ' ' + c['type'] for c in columns]) + ')')
         self.conn.commit()
         
-    def get_or_create_table(self, table_name, columns):
+    def get_or_create_table(self, columns):
         try:
-            self.get_table(table_name)
+            self.get_table()
         except:
-            self.create_table(table_name, columns)
+            self.create_table(columns)
 
-    def insert(self, table_name, columns, values, limit):
-        self.c.execute('SELECT ' + columns + ' FROM ' + table_name)
-        existing = [v[0] for v in self.c.fetchall()]
-        values = [v for v in values if v not in existing]
-        if len(values) > limit:
-            values = values[:limit]
-        self.c.executemany('INSERT INTO ' + table_name + ' (' + columns + ') VALUES (?)', [(v,) for v in values])
+    def insert(self, data, limit):
+        # make sure we don't insert duplicates
+        db_data = self.select()
+        db_data_ids = [d[0] for d in db_data]
+        data = [d for d in data if d['id'] not in db_data_ids]
+        data = data[:limit]
+        
+        for d in data:
+            self.c.execute('INSERT INTO ' + self.table_name + ' VALUES (' + ', '.join(['\'' + str(value) + '\'' for value in d.values()]) + ')')
+            
         self.conn.commit()
  
-    def update(self, table_name, column, value, condition):
-        self.c.execute('UPDATE ' + table_name + ' SET ' + column + ' = ' + value + ' WHERE ' + condition)
+    def update(self, column, value, condition):
+        self.c.execute('UPDATE ' + self.table_name + ' SET ' + column + ' = ' + value + ' WHERE ' + condition)
         self.conn.commit()
         
-    def delete(self, table_name, condition):
-        self.c.execute('DELETE FROM ' + table_name + ' WHERE ' + condition)
+    def delete(self, condition):
+        self.c.execute('DELETE FROM ' + self.table_name + ' WHERE ' + condition)
         self.conn.commit()
         
-    def select(self, table_name, columns, condition):
-        self.c.execute('SELECT ' + columns + ' FROM ' + table_name + ' WHERE ' + condition)
+    def select(self, condition=None):
+        if condition:
+            self.c.execute('SELECT * FROM ' + self.table_name + ' WHERE ' + condition)
+        else:
+            self.c.execute('SELECT * FROM ' + self.table_name)
         return self.c.fetchall()
     
     def close(self):
