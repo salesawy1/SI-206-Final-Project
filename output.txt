@@ -1,0 +1,1 @@
+Number of cities with air quality below 0.7 (not good): 46/200

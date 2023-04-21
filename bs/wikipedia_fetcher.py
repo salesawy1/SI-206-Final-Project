@@ -7,6 +7,8 @@ class CityData(TypedDict):
     state: str
     population: int
 
+# input: none
+# output: list of city data by scraping wikipedia
 def get_cities_list() -> List[CityData]:
     url = 'https://en.wikipedia.org/wiki/List_of_United_States_cities_by_population'
     r = requests.get(url)

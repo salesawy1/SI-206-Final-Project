@@ -21,7 +21,7 @@ if __name__ == "__main__":
     [x, y] = get_progress_bar_data(0.7)
     progress_bar(x, y)
 
-    # output nubmer of cities with air quality below 0.7
+    # output number of cities with air quality below 0.7
     cities = cities_db.select()
     air_quality = air_quality_db.select()
     num_cities = len(cities)
@@ -31,4 +31,7 @@ if __name__ == "__main__":
         if len(city_air_quality) > 0:
             if city_air_quality[0]['air_quality'] < 0.7:
                 num_cities_below_0_7 += 1
-    print(f'{num_cities_below_0_7} out of {num_cities} cities have an air quality below 0.7')
+
+    # output to file
+    with open('output.txt', 'w') as f:
+        f.write(f'Number of cities with air quality below 0.7 (not good): {num_cities_below_0_7}/{num_cities}')
