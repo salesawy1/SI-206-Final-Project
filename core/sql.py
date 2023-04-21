@@ -1,12 +1,13 @@
 import sqlite3
 
 class SQLInterface:
-    def __init__(self, db_name, table_name, columns):
+    def __init__(self, db_name, table_name, columns=None):
         self.db_name = db_name
         self.table_name = table_name
         self.conn = sqlite3.connect(db_name)
         self.c = self.conn.cursor()
-        self.columns = columns # { name: string, type: string }[]
+        if columns:
+            self.columns = columns # { name: string, type: string }[]
         
         # honestly just call get_or_create_table() here rather than always doing it outside
         self.get_or_create_table(columns)
@@ -19,7 +20,7 @@ class SQLInterface:
         self.c.execute('CREATE TABLE ' + self.table_name + ' (' + ', '.join([c['name'] + ' ' + c['type'] for c in columns]) + ')')
         self.conn.commit()
         
-    def get_or_create_table(self, columns):
+    def get_or_create_table(self, columns=None):
         try:
             self.get_table()
         except:
@@ -52,7 +53,12 @@ class SQLInterface:
             self.c.execute('SELECT * FROM ' + self.table_name + ' WHERE ' + condition)
         else:
             self.c.execute('SELECT * FROM ' + self.table_name)
-        return self.c.fetchall()
+        data = self.c.fetchall()
+        
+        # remap data to be a list of dicts
+        data = [dict(zip([c[0] for c in self.c.description], d)) for d in data]
+        
+        return data
     
     def close(self):
         self.conn.close()

@@ -1,8 +1,8 @@
-from sql import SQLInterface
-from wikipedia_fetcher import get_cities_list
-from utils import python_to_sql_types, generate_sql_columns_from_data
-from maps import get_location_count
-from teleport import get_city_details
+from core.sql import SQLInterface
+from bs.wikipedia_fetcher import get_cities_list
+from core.utils import python_to_sql_types, generate_sql_columns_from_data
+from apis.maps import get_location_count
+from apis.teleport import get_city_details
 
 LIMIT = 25
 
