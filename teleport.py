@@ -6,10 +6,6 @@ def get_teleport_data(city_name):
     if ua_endpoint:
         details = get_area_details(ua_endpoint)
         results['details'] = details
-        images = get_area_images(ua_endpoint)
-        results['images'] = images
-        scores = get_area_scores(ua_endpoint)
-        results['scores'] = scores
 
     return results
 
@@ -44,14 +40,6 @@ def get_area_details(ua_endpoint):
     except:
         return 'not_found'
 
-def get_area_images(ua_endpoint):
-    try:
-        r = requests.get(ua_endpoint + 'images/')
-        r = r.json()
-        return r['photos']
-    except:
-        return 'not_found'
-
 def get_area_scores(ua_endpoint):
     try:
         r = requests.get(ua_endpoint + 'scores/')
@@ -64,7 +52,35 @@ def get_area_scores(ua_endpoint):
         return result
     except:
         return 'not_found'
+    
+def get_details(city_name, details):
+    detail_map = {
+        'air_quality': get_air_quality,
+        'drinking_water_quality': get_drinking_water_quality
+    }
+    
+    data = get_teleport_data(city_name)
+    
+    res = {}
+    for detail in details:
+        if detail in detail_map:
+            res[detail] = detail_map[detail](data)
+        else:
+            res[detail] = 'not_found'
+            
+    return res
 
-city_name = 'London'
-results = get_teleport_data(city_name)
-print(results)
+def get_air_quality(data):
+    try:
+        return data['details']['Environmental Quality']['Air quality [Teleport score]']
+    except:
+        return 'not_found'
+    
+def get_drinking_water_quality(data):
+    try:
+        return data['details']['Environmental Quality']['Drinking water quality [Teleport score]']
+    except:
+        return 'not_found'
+
+# results = get_details('Seattle', ['air_quality', 'drinking_water_quality'])
+# print(results)
