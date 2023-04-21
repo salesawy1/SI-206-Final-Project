@@ -18,7 +18,7 @@ def get_cities_list() -> List[CityData]:
         cells = row.find_all('td')
 
         city_data = {
-            'id': len(cities),
+            'id': len(cities) + 1,
             'city': cells[0].find('a').text,
             'state': cells[1].find('a').text,
             'population': int(cells[2].text.replace('\n', '').replace(',', '')),
