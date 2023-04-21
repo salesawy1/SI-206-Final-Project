@@ -26,6 +26,8 @@ def get_cities_list() -> List[CityData]:
 
         cities.append(city_data)
 
+    print(f'Found {len(cities)} cities.')
+
     return cities
 
-print(get_cities_list())
+# print(get_cities_list())

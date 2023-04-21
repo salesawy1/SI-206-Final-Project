@@ -53,7 +53,7 @@ def get_area_scores(ua_endpoint):
     except:
         return 'not_found'
     
-def get_details(city_name, details):
+def get_city_details(city_name, details):
     detail_map = {
         'air_quality': get_air_quality,
         'drinking_water_quality': get_drinking_water_quality
