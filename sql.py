@@ -25,17 +25,19 @@ class SQLInterface:
         except:
             self.create_table(columns)
 
-    def insert(self, data, limit):
+    def insert(self, data, limit, identifier='id'):
         # make sure we don't insert duplicates
         db_data = self.select()
         db_data_ids = [d[0] for d in db_data]
-        data = [d for d in data if d['id'] not in db_data_ids]
+        data = [d for d in data if d[identifier] not in db_data_ids]
         data = data[:limit]
         
         for d in data:
             self.c.execute('INSERT INTO ' + self.table_name + ' VALUES (' + ', '.join(['\'' + str(value) + '\'' for value in d.values()]) + ')')
             
         self.conn.commit()
+        
+        return data
  
     def update(self, column, value, condition):
         self.c.execute('UPDATE ' + self.table_name + ' SET ' + column + ' = ' + value + ' WHERE ' + condition)
