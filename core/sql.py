@@ -29,8 +29,9 @@ class SQLInterface:
     def insert(self, data, limit, identifier='id'):
         # make sure we don't insert duplicates
         db_data = self.select()
-        db_data_ids = [d[0] for d in db_data]
-        data = [d for d in data if d[identifier] not in db_data_ids]
+        if db_data:
+            db_data_ids = [d[identifier] for d in db_data]
+            data = [d for d in data if d[identifier] not in db_data_ids]
         data = data[:limit]
         
         for d in data:
@@ -48,9 +49,9 @@ class SQLInterface:
         self.c.execute('DELETE FROM ' + self.table_name + ' WHERE ' + condition)
         self.conn.commit()
         
-    def select(self, condition=None):
-        if condition:
-            self.c.execute('SELECT * FROM ' + self.table_name + ' WHERE ' + condition)
+    def select(self, args=None):
+        if args:
+            self.c.execute('SELECT * FROM ' + self.table_name + ' ' + args)
         else:
             self.c.execute('SELECT * FROM ' + self.table_name)
         data = self.c.fetchall()
